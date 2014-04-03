@@ -1,0 +1,33 @@
+<?php
+
+/*
+Should put some doxygen stuff in here
+*/
+function ord_inventory_help($path, $args) {
+	switch ($path) {
+		case 'admin/help#ord_inventory':
+			return '<p>' . t('temporary help text for now') . '</p>';
+		break;
+	}
+}
+
+function ord_inventory_block_info() {
+	$block['ord_inventory_graph'] = array(
+		'info' => 'Inventory Analytics - Chart'
+	);
+
+	return $block;
+}
+
+function ord_inventory_block_view($delta = '') {
+	$block = array();
+
+	switch ($delta) {
+		case 'ord_inventory_graph':
+			$block['subject'] = null;
+			$block['content'] = 'we should put a graph in the block. we can use d3js to generate it from the stats we pull from inventory. should gather usage statistics for the dashboard on the admin side.';
+		break;
+	}
+
+	return $block;
+}
