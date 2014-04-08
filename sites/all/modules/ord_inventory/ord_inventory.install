@@ -1,0 +1,48 @@
+<?php
+
+function ord_inventory_schema() {
+
+  //hopefully this is right
+  $schema['ord_inventory_items'] = array(
+    'description' => 'An example table',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for my table.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'name' => array(
+        'description' => 'The name of the item',
+        'type' => 'varchar',
+        'length' => 250,
+        'default' => '',
+      ),
+      'taxonomy_id' => array(
+        'description' => 'A field for storing the category id of the item. Meant to store the taxonomy hook',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'description' => array(
+        'description' => 'A field for storing the description of the items',
+        'type' => 'varchar',
+        'length' => 250,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'rental_price' => array(
+        'description' => 'A field for storing longer strings of text.',
+        'type' => 'float',
+        'not null' => FALSE,
+      ),
+    ),
+    'indexes' => array(
+      'ord_inventory_items_id' => array('id'),
+    ),
+    'primary key' => array('id'),
+  );
+
+  return $schema;
+}
