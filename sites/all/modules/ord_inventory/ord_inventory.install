@@ -7,7 +7,7 @@ function ord_inventory_schema() {
     'description' => 'An example table',
     'fields' => array(
       'id' => array(
-        'description' => 'The primary identifier for my table.',
+        'description' => 'The primary identifier for the table.',
         'type' => 'serial',
         'unsigned' => TRUE,
         'not null' => TRUE,
@@ -16,6 +16,7 @@ function ord_inventory_schema() {
         'description' => 'The name of the item',
         'type' => 'varchar',
         'length' => 250,
+        'not null' => TRUE,
         'default' => '',
       ),
       'taxonomy_id' => array(

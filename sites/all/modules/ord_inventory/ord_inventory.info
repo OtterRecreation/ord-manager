@@ -1,3 +1,4 @@
 name = Ord Inventory Manager
 description = This module is meant to act as a base inventory management module for the OtterRecreation project at CSUMB.
 core = 7.x
+package = Ord Manager

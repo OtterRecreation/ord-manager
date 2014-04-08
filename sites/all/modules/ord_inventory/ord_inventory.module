@@ -89,7 +89,7 @@ function ord_inventory_node_view($node, $view_mode, $langcode) {
  */
 function ord_inventory_menu() {
   $items['ord_inventory/items'] = array(
-    'title' => 'Inventory',
+    'title' => 'Rentals',
     'description' => 'Show a page with a long list across multiple pages',
     'page callback' => 'ord_inventory_page',
     'access callback' => TRUE,
@@ -108,23 +108,22 @@ function ord_inventory_menu() {
  *   A render array completely set up with a pager.
  */
 function ord_inventory_page() {
-  // We are going to output the results in a table with a nice header.
+  
+  //this allows us to sort by these fields
   $header = array(
-    array('data' => t('Name')),
-    array('data' => t('Description')),
-    array('data' => t('Price')),
+    array('data' => t('Name'), 'field' => 'd.name'),
+    array('data' => t('Description') , 'field' => 'd.description'),
+    array('data' => t('Price'), 'field' => 'd.rental_price'),
   );
 
-  // We are extending the PagerDefault class here.
-  // It has a default of 10 rows per page.
-  // The extend('PagerDefault') part here does all the magic.
-  $query = db_select('ord_inventory_items', 'd')->extend('PagerDefault');
+  // We are extending the PagerDefault class here as well as the TableSort class
+  $query = db_select('ord_inventory_items', 'd')->extend('PagerDefault')->extend('TableSort');
   $query->fields('d', array('id', 'description', 'rental_price'));
 
   // Change the number of rows with the limit() call.
   $result = $query
-    ->limit(10)
-    ->orderBy('d.id')
+    ->limit(10) //change this number to make it page more...
+    ->orderByHeader($header)
     ->execute();
 
   $rows = array();
@@ -137,7 +136,7 @@ function ord_inventory_page() {
 
   // Create a render array ($build) which will be themed as a table with a
   // pager.
-  $build['pager_table'] = array(
+  $build['ord_inventory_table'] = array(
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $rows,
