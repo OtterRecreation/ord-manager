@@ -7,7 +7,6 @@ Should put some doxygen stuff in here
 //simply define the permission. the logic is handled by user_access('permission')
 function ord_inventory_permission() {
 
->>>>>>> Stashed changes
   $permission['add item'] = array('title' => t('Add item'));
   $permission['view own item'] = array('title' => t('View own item'));
   $permission['edit own item'] = array('title' => t('Edit own item'));
@@ -88,7 +87,7 @@ function ord_inventory_menu() {
       'description' => 'Show a page that will allow the permitted user to create a new item',
       'page callback' => 'ord_inventory_new_item',
       'access arguments' => array('add new item'),
-    )
+    );
 
     return $items;
 }
