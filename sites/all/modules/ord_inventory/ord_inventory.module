@@ -4,9 +4,10 @@
 Should put some doxygen stuff in here
 */
 
+//simply define the permission. the logic is handled by user_access('permission')
 function ord_inventory_permission() {
 
-  // item permissions
+>>>>>>> Stashed changes
   $permission['add item'] = array('title' => t('Add item'));
   $permission['view own item'] = array('title' => t('View own item'));
   $permission['edit own item'] = array('title' => t('Edit own item'));
@@ -17,69 +18,6 @@ function ord_inventory_permission() {
 
 }
 
-/**
- * Implements hook_field_access().
- *
- * We want to make sure that fields aren't being seen or edited
- * by those who shouldn't.
- *
- * We have to build a permission string similar to those in
- * hook_permission() in order to ask Drupal whether the user
- * has that permission. Permission strings will end up being
- * like 'view any fieldnote' or 'edit own fieldnote'.
- *
- * The tricky thing here is that a field can be attached to any type
- * of entity, so it's not always trivial to figure out whether
- * $account 'owns' the entity. We'll support access restrictions for
- * user and node entity types, and be permissive with others,
- * since that's easy to demonstrate.
- *
- * @see field_permission_example_permissions()
- */
-function ord_inventory_field_access($op, $field, $entity_type, $entity, $account) {
-  // This hook will be invoked for every field type, so we have to
-  // check that it's the one we're interested in.
-  if ($field['type'] == 'ord_inventory_item') {
-    // First we'll check if the user has the 'superuser'
-    // permissions that node provides. This way administrators
-    // will be able to administer the content types.
-    if (user_access('bypass node access', $account)) {
-      drupal_set_message(t('User can bypass node access.'));
-      return TRUE;
-    }
-    if (user_access('administer content types', $account)) {
-      drupal_set_message(t('User can administer content types.'));
-      return TRUE;
-    }
-    // Now check for our own permissions.
-    // $context will end up being either 'any' or 'own.'
-    $context = 'any';
-    switch ($entity_type) {
-      case 'user':
-      case 'node':
-        // While administering the field itself, $entity will be
-        // NULL, so we have to check it.
-        if ($entity) {
-          if ($entity->uid == $account->uid) {
-            $context = 'own';
-          }
-        }
-    }
-    // Assemble a permission string, such as
-    // 'view any fieldnote'
-    $permission = $op . ' ' . $context . ' item';
-    // Finally, ask Drupal if this account has that permission.
-    $access = user_access($permission, $account);
-    $status = 'FALSE';
-    if ($access) {
-      $status = 'TRUE';
-    }
-    drupal_set_message($permission . ': ' . $status);
-    return $access;
-  }
-  // We have no opinion on field types other than our own.
-  return TRUE;
-}
 
 function ord_inventory_help($path, $args) {
 
@@ -134,29 +72,28 @@ function ord_inventory_new_item_form($form, &$form_state) {
 /**
  * Implements hook_menu().
  */
+//NOTE: this is only run when the module is either installed or updated! therefore permissions won't take effect here
 function ord_inventory_menu() {
-  if( user_access('view any item') ) {
+    //list of items
     $items['ord_inventory/items'] = array(
       'title' => 'Rentals',
       'description' => 'Show a page with a long list across multiple pages',
-      'page callback' => 'ord_inventory_page',
-      'access callback' => TRUE,
+      'page callback' => 'ord_inventory_items',
+      'access arguments' => array('view any item'), //only show the page when this is satisfied
     );
+
+    //add new item
+    $items['ord_inventory/items/add'] = array(
+      'title' => 'Add Item',
+      'description' => 'Show a page that will allow the permitted user to create a new item',
+      'page callback' => 'ord_inventory_new_item',
+      'access arguments' => array('add new item'),
+    )
+
     return $items;
-  }
 }
 
-/**
- * Build the pager query.
- *
- * Uses the date_formats table since it is installed with ~35 rows
- * in it and we don't have to create fake data in order to show
- * this example.
- *
- * @return array
- *   A render array completely set up with a pager.
- */
-function ord_inventory_page() {
+function ord_inventory_items() {
     //this allows us to sort by these fields
     $header = array(
       array('data' => t('Name'), 'field' => 'd.name'),
@@ -206,7 +143,6 @@ function ord_inventory_page_build(&$page) {
 
   //probably not the best way to check the page (since this link can change based on settings)
   if( current_path() == 'ord_inventory/items' ) {
-
       //now check the permissions
       if(user_access('edit any item'))
       {
