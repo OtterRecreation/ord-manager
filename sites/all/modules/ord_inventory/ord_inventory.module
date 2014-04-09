@@ -3,6 +3,84 @@
 /*
 Should put some doxygen stuff in here
 */
+
+function ord_inventory_permission() {
+
+  // item permissions
+  $permission['add item'] = array('title' => t('Add item'));
+  $permission['view own item'] = array('title' => t('View own item'));
+  $permission['edit own item'] = array('title' => t('Edit own item'));
+  $permission['view any item'] = array('title' => t('View any item'));
+  $permission['edit any item'] = array('title' => t('Edit any item'));
+
+  return $permission;
+
+}
+
+/**
+ * Implements hook_field_access().
+ *
+ * We want to make sure that fields aren't being seen or edited
+ * by those who shouldn't.
+ *
+ * We have to build a permission string similar to those in
+ * hook_permission() in order to ask Drupal whether the user
+ * has that permission. Permission strings will end up being
+ * like 'view any fieldnote' or 'edit own fieldnote'.
+ *
+ * The tricky thing here is that a field can be attached to any type
+ * of entity, so it's not always trivial to figure out whether
+ * $account 'owns' the entity. We'll support access restrictions for
+ * user and node entity types, and be permissive with others,
+ * since that's easy to demonstrate.
+ *
+ * @see field_permission_example_permissions()
+ */
+function ord_inventory_field_access($op, $field, $entity_type, $entity, $account) {
+  // This hook will be invoked for every field type, so we have to
+  // check that it's the one we're interested in.
+  if ($field['type'] == 'ord_inventory_item') {
+    // First we'll check if the user has the 'superuser'
+    // permissions that node provides. This way administrators
+    // will be able to administer the content types.
+    if (user_access('bypass node access', $account)) {
+      drupal_set_message(t('User can bypass node access.'));
+      return TRUE;
+    }
+    if (user_access('administer content types', $account)) {
+      drupal_set_message(t('User can administer content types.'));
+      return TRUE;
+    }
+    // Now check for our own permissions.
+    // $context will end up being either 'any' or 'own.'
+    $context = 'any';
+    switch ($entity_type) {
+      case 'user':
+      case 'node':
+        // While administering the field itself, $entity will be
+        // NULL, so we have to check it.
+        if ($entity) {
+          if ($entity->uid == $account->uid) {
+            $context = 'own';
+          }
+        }
+    }
+    // Assemble a permission string, such as
+    // 'view any fieldnote'
+    $permission = $op . ' ' . $context . ' item';
+    // Finally, ask Drupal if this account has that permission.
+    $access = user_access($permission, $account);
+    $status = 'FALSE';
+    if ($access) {
+      $status = 'TRUE';
+    }
+    drupal_set_message($permission . ': ' . $status);
+    return $access;
+  }
+  // We have no opinion on field types other than our own.
+  return TRUE;
+}
+
 function ord_inventory_help($path, $args) {
 
 	switch ($path) {
@@ -53,48 +131,19 @@ function ord_inventory_new_item_form($form, &$form_state) {
 	return $form;
 }
 
-//BEGIN THE NODE_MODULE PORTION
-function ord_inventory_node_info() {
-  
-  return array(
-    'ord_inventory_admin' => array(
-      'name' => t('Ord Inventory - Admin'),
-      'base' => 'ord_inventory',
-      'description' => t('Used to be a page to help manage the back end of the inventory system.'),
-      'title_label' => t('Ord Inventory for Admins'),
-      'locked' => TRUE, // machine name will be unchangable
-    ),
-    'ord_inventory_user' => array(
-      'name' => t('Ord Inventory - User'),
-      'base' => 'ord_inventory',
-      'description' => t('Used to be a page to help manage the front end of the inventory system.'),
-      'title_label' => t('Ord Inventory for Users'),
-      'locked' => TRUE, // machine name will be unchangable
-    ),
-  );
-}
-
-function ord_inventory_node_view($node, $view_mode, $langcode) {
-
-  $node->content['my_additional_field'] = array(
-    '#markup' => 'what goes here',
-    '#weight' => 10,
-    '#theme' => 'ord_inventory_my_additional_field',
-  );
-
-}
-
 /**
  * Implements hook_menu().
  */
 function ord_inventory_menu() {
-  $items['ord_inventory/items'] = array(
-    'title' => 'Rentals',
-    'description' => 'Show a page with a long list across multiple pages',
-    'page callback' => 'ord_inventory_page',
-    'access callback' => TRUE,
-  );
-  return $items;
+  if( user_access('view any item') ) {
+    $items['ord_inventory/items'] = array(
+      'title' => 'Rentals',
+      'description' => 'Show a page with a long list across multiple pages',
+      'page callback' => 'ord_inventory_page',
+      'access callback' => TRUE,
+    );
+    return $items;
+  }
 }
 
 /**
@@ -108,46 +157,65 @@ function ord_inventory_menu() {
  *   A render array completely set up with a pager.
  */
 function ord_inventory_page() {
-  
-  //this allows us to sort by these fields
-  $header = array(
-    array('data' => t('Name'), 'field' => 'd.name'),
-    array('data' => t('Description') , 'field' => 'd.description'),
-    array('data' => t('Price'), 'field' => 'd.rental_price'),
-  );
+    //this allows us to sort by these fields
+    $header = array(
+      array('data' => t('Name'), 'field' => 'd.name'),
+      array('data' => t('Description') , 'field' => 'd.description'),
+      array('data' => t('Price'), 'field' => 'd.rental_price'),
+    );
 
-  // We are extending the PagerDefault class here as well as the TableSort class
-  $query = db_select('ord_inventory_items', 'd')->extend('PagerDefault')->extend('TableSort');
-  $query->fields('d', array('id', 'description', 'rental_price'));
+    // We are extending the PagerDefault class here as well as the TableSort class
+    $query = db_select('ord_inventory_items', 'd')->extend('PagerDefault')->extend('TableSort');
+    $query->fields('d', array('id', 'description', 'rental_price'));
 
-  // Change the number of rows with the limit() call.
-  $result = $query
-    ->limit(10) //change this number to make it page more...
-    ->orderByHeader($header)
-    ->execute();
+    // Change the number of rows with the limit() call.
+    $result = $query
+      ->limit(10) //change this number to make it page more...
+      ->orderByHeader($header)
+      ->execute();
 
-  $rows = array();
-  foreach ($result as $row) {
-    // Normally we would add some nice formatting to our rows
-    // but for our purpose we are simply going to add our row
-    // to the array.
-    $rows[] = array('data' => (array) $row);
-  }
+    $rows = array();
+    foreach ($result as $row) {
+      // Normally we would add some nice formatting to our rows
+      // but for our purpose we are simply going to add our row
+      // to the array.
+      $rows[] = array('data' => (array) $row);
+    }
 
-  // Create a render array ($build) which will be themed as a table with a
-  // pager.
-  $build['ord_inventory_table'] = array(
-    '#theme' => 'table',
-    '#header' => $header,
-    '#rows' => $rows,
-    '#empty' => t('No items yet'),
-  );
+    // Create a render array ($build) which will be themed as a table with a
+    // pager.
+    $build['ord_inventory_table'] = array(
+      '#theme' => 'table',
+      '#header' => $header,
+      '#rows' => $rows,
+      '#empty' => t('No items yet'),
+    );
 
-  // Attach the pager theme.
-  $build['pager_pager'] = array('#theme' => 'pager');
+    // Attach the pager theme.
+    $build['pager_pager'] = array('#theme' => 'pager');
 
-  return $build;
+    return $build;
 }
+
 /**
  * @} End of "defgroup pager_example".
  */
+
+//override some of the page stuff
+function ord_inventory_page_build(&$page) {
+
+  //probably not the best way to check the page (since this link can change based on settings)
+  if( current_path() == 'ord_inventory/items' ) {
+
+      //now check the permissions
+      if(user_access('edit any item'))
+      {
+        $page['content']['#sorted'] = FALSE; //required for the weight to work?
+
+        $page['content']['before'] = array(
+            '#markup' => '<a class="btn btn-success pull-right">Add item</a>',
+            '#weight' => 0, //means it will show up first
+        );
+      }
+  }
+}
