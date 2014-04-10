@@ -52,7 +52,8 @@ function ord_inventory_block_view($delta = '') {
 	return $block;
 }
 
-function ord_inventory_new_item_form($form, &$form_state) {
+//probably not an ideal way of handling this (by using null)
+function ord_inventory_new_item_form($form = null, &$form_state = null) {
 	
 	$form['item_name'] = array(
 		'#type' => 'textfield',
@@ -68,12 +69,9 @@ function ord_inventory_new_item_form($form, &$form_state) {
 	return $form;
 }
 
-/**
- * Implements hook_menu().
- */
-//NOTE: this is only run when the module is either installed or updated! therefore permissions won't take effect here
 function ord_inventory_menu() {
     //list of items
+
     $items['ord_inventory/items'] = array(
       'title' => 'Rentals',
       'description' => 'Show a page with a long list across multiple pages',
@@ -81,13 +79,12 @@ function ord_inventory_menu() {
       'access arguments' => array('view any item'), //only show the page when this is satisfied
     );
 
-    //add new item
-    $items['ord_inventory/items/add'] = array(
-      'title' => 'Add Item',
-      'description' => 'Show a page that will allow the permitted user to create a new item',
-      'page callback' => 'ord_inventory_new_item',
-      'access arguments' => array('add new item'),
-    );
+    // $items['ord_inventory/items/add'] = array(
+    //   'title' => 'Add Item',
+    //   'description' => 'Show a page where you can add a new inventory item',
+    //   'page callback' => drupal_get_form('ord_inventory_new_item_form'),
+    //   'access arguments' => array('add item'),
+    // );
 
     return $items;
 }
@@ -148,7 +145,7 @@ function ord_inventory_page_build(&$page) {
         $page['content']['#sorted'] = FALSE; //required for the weight to work?
 
         $page['content']['before'] = array(
-            '#markup' => '<a class="btn btn-success pull-right">Add item</a>',
+            '#markup' => t('<a class="btn btn-success pull-right" href="@url">Add item</a>', array( '@url' => url('ord_inventory/items/add') ) ),
             '#weight' => 0, //means it will show up first
         );
       }
