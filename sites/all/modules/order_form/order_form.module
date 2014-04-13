@@ -35,6 +35,7 @@ function order_form_block_view($delta = ''){
 
 function order_form_add_form($form, &$form_state){
 
+	// part number from catalog
 	$form['part_number'] = array(
 		'#type' 	 => 'textfield',
 		'#requiered' => TRUE,
@@ -75,30 +76,19 @@ function order_form_add_form($form, &$form_state){
 }
 
 
-// will this work?  not sure.
-function order_form_submit($form, &$form_state){
 
-	$part_number = $form_state['values']['part_number'];
-	$quantity = $form_state['values']['quantity'];
-	$description = $form_state['values']['description'];
-	$cost_wholesale = $form_state['values']['cost_wholesale'];
-	$sale_price = $form_state['values']['sale_price'];
-}
-
-
-// testing if this one work vs the one above...
+// this is called from #submit above, sends form data into DB
+//
 function order_form_insert($form, &$form_state) {
 
 
   // Grab the info from $node and insert into your tables here...
   db_insert('order_form_items')->fields(array(
-
-    'catalog_number' 	 => $form_state['values']['part_number'],
+    'catalog_number' => $form_state['values']['part_number'],
     'quantity' 		 => $form_state['values']['quantity'],
     'description' 	 => $form_state['values']['description'],
     'cost_wholesale' => $form_state['values']['cost_wholesale'],
     'sale_price' 	 => $form_state['values']['sale_price'],
-
   ))->execute();
 }
 
