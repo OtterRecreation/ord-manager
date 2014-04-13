@@ -1,0 +1,4 @@
+name = Ord Order Form
+description = Testing table creation, data insertion, and working on creating an order form.
+core = 7.x
+package = Ord Manager
