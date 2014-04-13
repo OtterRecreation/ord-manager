@@ -68,6 +68,7 @@ function order_form_add_form($form, &$form_state){
 	$form['submit'] = array(
 		'#type'  => 'submit',
 		'#value' => 'submit',
+		'#submit'=> array('order_form_insert'),// call function to add to DB
 	);
 
 	return $form;
@@ -86,15 +87,17 @@ function order_form_submit($form, &$form_state){
 
 
 // testing if this one work vs the one above...
-function order_form_insert() {
+function order_form_insert($form, &$form_state) {
+
+
   // Grab the info from $node and insert into your tables here...
   db_insert('order_form_items')->fields(array(
 
-    'part_number' 	 => $part_number,
-    'quantity' 		 => $quantity,
-    'description' 	 => $description,
-    'cost_wholesale' => $cost_wholesale,
-    'sale_price' 	 => $sale_price,
+    'catalog_number' 	 => $form_state['values']['part_number'],
+    'quantity' 		 => $form_state['values']['quantity'],
+    'description' 	 => $form_state['values']['description'],
+    'cost_wholesale' => $form_state['values']['cost_wholesale'],
+    'sale_price' 	 => $form_state['values']['sale_price'],
 
   ))->execute();
 }
