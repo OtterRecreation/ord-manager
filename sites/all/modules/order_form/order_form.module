@@ -4,6 +4,7 @@
 
 // this will be the help menu for admins if they need it.
 function order_form_help($path, $args){
+
 	switch($path){
 		case 'admin/help#ord_inventory':
 			return '<p>' . t('temp help for order form') . '</p>';
@@ -12,6 +13,7 @@ function order_form_help($path, $args){
 }
 
 function order_form_block_info(){
+
 	$block['order_form_graph'] = array(
 		'info' => 'Order form. Special orders and general stock'
 		);
@@ -19,6 +21,7 @@ function order_form_block_info(){
 }
 
 function order_form_block_view($delta = ''){
+
 	$block = array();
 
 	switch ($delta){
@@ -31,6 +34,7 @@ function order_form_block_view($delta = ''){
 }
 
 function order_form_add_form($form, &$form_state){
+
 	$form['part_number'] = array(
 		'#type' 	 => 'textfield',
 		'#requiered' => TRUE,
@@ -69,3 +73,32 @@ function order_form_add_form($form, &$form_state){
 	return $form;
 }
 
+
+// will this work?  not sure.
+function order_form_submit($form, &$form_state){
+
+	$part_number = $form_state['values']['part_number'];
+	$quantity = $form_state['values']['quantity'];
+	$description = $form_state['values']['description'];
+	$cost_wholesale = $form_state['values']['cost_wholesale'];
+	$sale_price = $form_state['values']['sale_price'];
+}
+
+
+// testing if this one work vs the one above...
+function order_form_insert() {
+  // Grab the info from $node and insert into your tables here...
+  db_insert('order_form_items')->fields(array(
+
+    'part_number' 	 => $part_number,
+    'quantity' 		 => $quantity,
+    'description' 	 => $description,
+    'cost_wholesale' => $cost_wholesale,
+    'sale_price' 	 => $sale_price,
+
+  ))->execute();
+}
+
+
+// link to form submit help 
+//https://drupal.org/comment/6761682#comment-6761682
