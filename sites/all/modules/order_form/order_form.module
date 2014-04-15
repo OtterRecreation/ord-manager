@@ -1,0 +1,97 @@
+<?php
+// based off ord_inventory.module.
+
+
+// this will be the help menu for admins if they need it.
+function order_form_help($path, $args){
+
+	switch($path){
+		case 'admin/help#ord_inventory':
+			return '<p>' . t('temp help for order form') . '</p>';
+		break;
+	}
+}
+
+function order_form_block_info(){
+
+	$block['order_form_graph'] = array(
+		'info' => 'Order form. Special orders and general stock'
+		);
+	return $block;
+}
+
+function order_form_block_view($delta = ''){
+
+	$block = array();
+
+	switch ($delta){
+		case 'order_form_graph': // not sure if graph is the right syntax.
+			$block['subject'] = null;
+			$block['content'] = drupal_get_form('order_form_add_form');
+		break; 
+	}
+	return $block;
+}
+
+function order_form_add_form($form, &$form_state){
+
+	// part number from catalog
+	$form['part_number'] = array(
+		'#type' 	 => 'textfield',
+		'#requiered' => TRUE,
+		'#title' 	 => t('Catalog Number'),
+	);
+
+	$form['quantity'] = array(
+		'#type' 	 => 'textfield',
+		'#requiered' => TRUE,
+		'#title' 	 => t('Quantity to order'),
+	);
+
+	$form['description'] = array(
+		'#type' 	 => 'textfield',
+		'#requiered' => TRUE,
+		'#title' 	 => t('Part description'),
+	);
+
+	$form['cost_wholesale'] = array(
+		'#type' 	 => 'textfield',
+		'#requiered' => TRUE,
+		'#title' 	 => t('Wholesale cost'),
+	);
+
+	$form['sale_price'] = array(
+		'#type' 	 => 'textfield',
+		'#requiered' => TRUE,
+		'#title' 	 => t('Customer price'),
+	);
+
+	$form['submit'] = array(
+		'#type'  => 'submit',
+		'#value' => 'submit',
+		'#submit'=> array('order_form_insert'),// call function to add to DB
+	);
+
+	return $form;
+}
+
+
+
+// this is called from #submit above, sends form data into DB
+//
+function order_form_insert($form, &$form_state) {
+
+
+  // Grab the info from $node and insert into your tables here...
+  db_insert('order_form_items')->fields(array(
+    'catalog_number' => $form_state['values']['part_number'],
+    'quantity' 		 => $form_state['values']['quantity'],
+    'description' 	 => $form_state['values']['description'],
+    'cost_wholesale' => $form_state['values']['cost_wholesale'],
+    'sale_price' 	 => $form_state['values']['sale_price'],
+  ))->execute();
+}
+
+
+// link to form submit help 
+//https://drupal.org/comment/6761682#comment-6761682

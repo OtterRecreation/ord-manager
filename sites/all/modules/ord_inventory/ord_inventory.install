@@ -1,8 +1,8 @@
 <?php
 
-//called when drupal first sees the module
 function ord_inventory_schema() {
 
+  //hopefully this is right
   $schema['ord_inventory_items'] = array(
     'description' => 'An example table',
     'fields' => array(
