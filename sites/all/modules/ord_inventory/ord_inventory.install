@@ -5,9 +5,75 @@ function ord_inventory_install() {
     setup_taxonomy();
 }
 
+//we can add more terms/vocabularies as needed
+function setup_taxonomy() {
+
+  $vocab = get_taxonomy_vocabularies();
+  //must be an object (casting it to an object)
+  foreach($vocab as $v) {
+    taxonomy_vocabulary_save((object) $v);
+  }
+
+  // RIGHT NOW WE DON'T NEED TO CREATE A VOCABULARY
+  // $vocab = taxonomy_vocabulary_machine_name_load('brand');
+
+  // $term = (object) array(
+  //   'name' => 'Model',
+  //   'machine_name' => 'model',
+  //   'description' => 'This is meant to be the model term under the brand term',
+  //   'vid' => $vocab->vid,
+  // );
+  
+  // taxonomy_term_save($term);
+}
+
 function ord_inventory_uninstall() {
-      $vocab = taxonomy_vocabulary_machine_name_load('brand');
-      taxonomy_vocabulary_delete($vocab->vid); //will delete any of it's children as well
+      $vocab = get_taxonomy_vocabularies();
+
+      foreach($vocab as $key => $v) {
+          $v = taxonomy_vocabulary_machine_name_load($key);
+          taxonomy_vocabulary_delete($v->vid);
+      }
+}
+
+function get_taxonomy_vocabularies() {
+  // Create the vocabulary programatically.
+  $vocab['brand'] = array(
+    'name' => 'Brand',
+    'machine_name' => 'brand',
+    'description' => t('The brand that the item is associated with'),
+    'module' => 'ord_inventory',
+  );
+
+  $vocab['model'] = array(
+    'name' => 'Model',
+    'machine_name' => 'model',
+    'description' => t('The model that the item is associated with. (Really falls under the brand)'),
+    'module' => 'ord_inventory',
+  );
+
+  $vocab['catalogue'] = array(
+    'name' => 'Catalogue',
+    'machine_name' => 'catalogue',
+    'description' => t('The catalogue the item is associated with'),
+    'module' => 'ord_inventory',
+  );
+
+  $vocab['status'] = array(
+    'name' => 'Status',
+    'machine_name' => 'status',
+    'description' => t('The status the item is associated with'),
+    'module' => 'ord_inventory',
+  );
+
+  $vocab['condition'] = array(
+    'name' => 'Condition',
+    'machine_name' => 'condition',
+    'description' => t('The condition the item is associated with'),
+    'module' => 'ord_inventory',
+  );
+
+  return $vocab;
 }
 
 function ord_inventory_schema() {
@@ -15,31 +81,6 @@ function ord_inventory_schema() {
   $schema['ord_inventory_asset'] = ord_inventory_asset_table();
 
   return $schema;
-}
-
-//we can add more terms/vocabularies as needed
-function setup_taxonomy() {
-
-  // Create the vocabulary programatically.
-  $vocab = (object) array(
-    'name' => 'Brand',
-    'machine_name' => 'brand',
-    'description' => t('The brand that the item is associated with'),
-    'module' => 'ord_inventory',
-  );
-
-  taxonomy_vocabulary_save($vocab);
-
-  $vocab = taxonomy_vocabulary_machine_name_load('brand');
-
-  $term = (object) array(
-    'name' => 'Model',
-    'machine_name' => 'model',
-    'description' => 'This is meant to be the model term under the brand term',
-    'vid' => $vocab->vid,
-  );
-  
-  taxonomy_term_save($term);
 }
 
 function ord_inventory_asset_class_table() {
