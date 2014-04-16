@@ -16,11 +16,11 @@ function ord_inventory_help($path, $args) {
 //BEGIN THE NODE_MODULE PORTION
 function ord_inventory_node_info() {
   return array(
-    'ord_inventory_admin' => array(
+    'ord_inventory_item' => array(
       'name' => t('Ord Inventory Item'),
       'base' => 'ord_inventory',
-      'description' => t('Used to be a page to help manage the back end of the inventory system.'),
-      'title_label' => t('Ord Inventory for Admins'),
+      'description' => t('Used to create new items'),
+      'title_label' => t('Ord Inventory Item'),
       'locked' => TRUE, // machine name will be unchangable
     ),
   );
