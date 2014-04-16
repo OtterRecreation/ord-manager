@@ -1,6 +1,7 @@
 <?php
 
 function ord_inventory_install() {
+    //define any terms that should be installed
     setup_taxonomy();
 }
 
@@ -10,15 +11,13 @@ function ord_inventory_uninstall() {
 }
 
 function ord_inventory_schema() {
-
-  //define the taxonomy terms that should come preinstalled
-
-  //hopefully this is right
+  $schema['ord_inventory_asset_class'] = ord_inventory_asset_class_table();
   $schema['ord_inventory_asset'] = ord_inventory_asset_table();
 
   return $schema;
 }
 
+//we can add more terms/vocabularies as needed
 function setup_taxonomy() {
 
   // Create the vocabulary programatically.
@@ -43,10 +42,9 @@ function setup_taxonomy() {
   taxonomy_term_save($term);
 }
 
-//the table used for the assets (items)
-function ord_inventory_asset_table() {
+function ord_inventory_asset_class_table() {
   return array(
-    'description' => 'This table is used to keep track of any physical items of the Ord Manager system',
+    'description' => 'This table is used to keep track of a class of items in Ord Manager tables',
       'fields' => array(
           'id' => array(
               'description' => 'The primary identifier for the table.',
@@ -83,6 +81,94 @@ function ord_inventory_asset_table() {
               'mysql_type' => 'DATETIME',
               'type' => 'datetime',
               'not null' => TRUE,
+          )
+      ),
+      'indexes' => array(
+        'ord_inventory_items_id' => array('id'),
+      ),
+      'primary key' => array('id'),
+  );
+}
+
+function ord_inventory_asset_table() {
+  return array(
+    'description' => 'This table is used to keep track of any physical items of the Ord Manager system',
+      'fields' => array(
+          'id' => array(
+              'description' => 'The primary identifier for the table.',
+              'type' => 'serial',
+              'unsigned' => TRUE,
+              'not null' => TRUE,
+          ),
+          'ac_id' => array(
+              'description' => 'Asset class the item is associated with',
+              'type' => 'int',
+              'not null' => TRUE,
+              'default' => 0,
+          ),
+          'brand_id' => array(
+              'description' => 'Brand the item is a part of',
+              'type' => 'int',
+              'not null' => TRUE,
+              'default' => 0,
+          ),
+          'model_id' => array(
+              'description' => 'Model the item is a part of',
+              'type' => 'int',
+              'not null' => TRUE,
+              'default' => 0,
+          ),
+          'catalogue_id' => array(
+              'description' => 'The specific catalogue number of the item',
+              'type' => 'int',
+              'not null' => TRUE,
+              'default' => 0,
+          ),
+          'catalogue_number' => array(
+              'description' => 'The catalogue number the item is associated with',
+              'type' => 'int',
+              'not null' => TRUE,
+              'default' => 0,
+          ),
+          'status_id' => array(
+              'description' => 'Status of the asset',
+              'type' => 'int',
+              'not null' => TRUE,
+              'default' => 0,
+          ),
+          'condition_id' => array(
+              'description' => 'The condition of the asset',
+              'type' => 'int',
+              'not null' => TRUE,
+              'default' => 0,
+          ),
+          'location_id' => array(
+              'description' => 'Location of the asset',
+              'type' => 'int',
+              'not null' => TRUE,
+              'default' => 0,
+          ),
+          'wholesale_cost' => array(
+              'description' => 'The cost of the asset based on wholesale',
+              'type' => 'float',
+              'null' => TRUE,
+          ),
+          'purchase_cost' => array(
+              'description' => 'The cost of the asset if it were sold to the customer',
+              'type' => 'float',
+              'null' => TRUE,
+          ),
+          'created_at' => array(
+              'description' => 'Keeps track of the date / time of when the asset was created',
+              'mysql_type' => 'DATETIME',
+              'type' => 'datetime',
+              'not null' => TRUE,
+          ),
+          'created_by' => array(
+              'description' => 'Keeps track of the user that made this entry',
+              'type' => 'int',
+              'not null' => TRUE,
+              'default' => 0,
           )
       ),
       'indexes' => array(
