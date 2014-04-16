@@ -1,43 +1,29 @@
 <?php
 
 function ord_inventory_install() {
-    //define any terms that should be installed
-    setup_taxonomy();
+    install_taxonomy_vocabularies();
 }
 
-//we can add more terms/vocabularies as needed
-function setup_taxonomy() {
+function install_taxonomy_vocabularies() {
 
   $vocab = get_taxonomy_vocabularies();
   //must be an object (casting it to an object)
   foreach($vocab as $v) {
     taxonomy_vocabulary_save((object) $v);
   }
-
-  // RIGHT NOW WE DON'T NEED TO CREATE A VOCABULARY
-  // $vocab = taxonomy_vocabulary_machine_name_load('brand');
-
-  // $term = (object) array(
-  //   'name' => 'Model',
-  //   'machine_name' => 'model',
-  //   'description' => 'This is meant to be the model term under the brand term',
-  //   'vid' => $vocab->vid,
-  // );
-  
-  // taxonomy_term_save($term);
 }
 
 function ord_inventory_uninstall() {
-      $vocab = get_taxonomy_vocabularies();
+  $vocab = get_taxonomy_vocabularies();
 
-      foreach($vocab as $key => $v) {
-          $v = taxonomy_vocabulary_machine_name_load($key);
-          taxonomy_vocabulary_delete($v->vid);
-      }
+  foreach($vocab as $key => $v) {
+      $v = taxonomy_vocabulary_machine_name_load($key);
+      taxonomy_vocabulary_delete($v->vid);
+  }
 }
 
 function get_taxonomy_vocabularies() {
-  // Create the vocabulary programatically.
+  // Create the vocabularies programatically.
   $vocab['brand'] = array(
     'name' => 'Brand',
     'machine_name' => 'brand',
