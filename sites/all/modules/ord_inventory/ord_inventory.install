@@ -1,49 +1,93 @@
 <?php
 
+function ord_inventory_install() {
+    setup_taxonomy();
+}
+
+function ord_inventory_uninstall() {
+      $vocab = taxonomy_vocabulary_machine_name_load('brand');
+      taxonomy_vocabulary_delete($vocab->vid); //will delete any of it's children as well
+}
+
 function ord_inventory_schema() {
 
+  //define the taxonomy terms that should come preinstalled
+
   //hopefully this is right
-  $schema['ord_inventory_items'] = array(
-    'description' => 'An example table',
-    'fields' => array(
-      'id' => array(
-        'description' => 'The primary identifier for the table.',
-        'type' => 'serial',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-      'name' => array(
-        'description' => 'The name of the item',
-        'type' => 'varchar',
-        'length' => 250,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-      'taxonomy_id' => array(
-        'description' => 'A field for storing the category id of the item. Meant to store the taxonomy hook',
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-      'description' => array(
-        'description' => 'A field for storing the description of the items',
-        'type' => 'varchar',
-        'length' => 250,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-      'rental_price' => array(
-        'description' => 'A field for storing longer strings of text.',
-        'type' => 'float',
-        'not null' => FALSE,
-      ),
-    ),
-    'indexes' => array(
-      'ord_inventory_items_id' => array('id'),
-    ),
-    'primary key' => array('id'),
-  );
+  $schema['ord_inventory_asset'] = ord_inventory_asset_table();
 
   return $schema;
+}
+
+function setup_taxonomy() {
+
+  // Create the vocabulary programatically.
+  $vocab = (object) array(
+    'name' => 'Brand',
+    'machine_name' => 'brand',
+    'description' => t('The brand that the item is associated with'),
+    'module' => 'ord_inventory',
+  );
+
+  taxonomy_vocabulary_save($vocab);
+
+  $vocab = taxonomy_vocabulary_machine_name_load('brand');
+
+  $term = (object) array(
+    'name' => 'Model',
+    'machine_name' => 'model',
+    'description' => 'This is meant to be the model term under the brand term',
+    'vid' => $vocab->vid,
+  );
+  
+  taxonomy_term_save($term);
+}
+
+//the table used for the assets (items)
+function ord_inventory_asset_table() {
+  return array(
+    'description' => 'This table is used to keep track of any physical items of the Ord Manager system',
+      'fields' => array(
+          'id' => array(
+              'description' => 'The primary identifier for the table.',
+              'type' => 'serial',
+              'unsigned' => TRUE,
+              'not null' => TRUE,
+          ),
+          'name' => array(
+              'description' => 'The name of the item',
+              'type' => 'varchar',
+              'length' => 250,
+              'not null' => TRUE,
+              'default' => '',
+          ),
+          'description' => array(
+              'description' => 'A field for storing the description of the items',
+              'type' => 'varchar',
+              'length' => 250,
+              'not null' => TRUE,
+              'default' => '',
+          ),
+          'retail_price' => array(
+              'description' => 'A field for storing longer strings of text.',
+              'type' => 'float',
+              'not null' => FALSE,
+          ),
+          'extra' => array(
+              'description' => 'Holds JSON data ',
+              'type' => 'text',
+              'not null' => TRUE,
+          ),
+          'created_at' => array(
+              'description' => 'Keeps track of the date / time of when the asset was created',
+              'mysql_type' => 'DATETIME',
+              'type' => 'datetime',
+              'not null' => TRUE,
+          )
+      ),
+      'indexes' => array(
+        'ord_inventory_items_id' => array('id'),
+      ),
+      'primary key' => array('id'),
+  );
 }
