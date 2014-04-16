@@ -13,62 +13,14 @@ function ord_inventory_help($path, $args) {
 
 }
 
-function ord_inventory_block_info() {
-
-	$block['ord_inventory_graph'] = array(
-		'info' => 'Inventory Analytics - Chart'
-	);
-
-	return $block;
-}
-
-function ord_inventory_block_view($delta = '') {
-
-	$block = array();
-
-	switch ($delta) {
-		case 'ord_inventory_graph':
-			$block['subject'] = null;
-			//lets see if we can have a form in this thing
-			$block['content'] = drupal_get_form('ord_inventory_new_item_form');
-		break;
-	}
-
-	return $block;
-}
-
-function ord_inventory_new_item_form($form, &$form_state) {
-	
-	$form['item_name'] = array(
-		'#type' => 'textfield',
-		'#required' => true,
-		'#title' => t('item name'),
-	);
-
-	$form['submit'] = array(
-		'#type' => 'submit',
-		'#value' => 'submit',
-	);
-
-	return $form;
-}
-
 //BEGIN THE NODE_MODULE PORTION
 function ord_inventory_node_info() {
-  
   return array(
     'ord_inventory_admin' => array(
-      'name' => t('Ord Inventory - Admin'),
+      'name' => t('Ord Inventory Item'),
       'base' => 'ord_inventory',
       'description' => t('Used to be a page to help manage the back end of the inventory system.'),
       'title_label' => t('Ord Inventory for Admins'),
-      'locked' => TRUE, // machine name will be unchangable
-    ),
-    'ord_inventory_user' => array(
-      'name' => t('Ord Inventory - User'),
-      'base' => 'ord_inventory',
-      'description' => t('Used to be a page to help manage the front end of the inventory system.'),
-      'title_label' => t('Ord Inventory for Users'),
       'locked' => TRUE, // machine name will be unchangable
     ),
   );
@@ -97,16 +49,6 @@ function ord_inventory_menu() {
   return $items;
 }
 
-/**
- * Build the pager query.
- *
- * Uses the date_formats table since it is installed with ~35 rows
- * in it and we don't have to create fake data in order to show
- * this example.
- *
- * @return array
- *   A render array completely set up with a pager.
- */
 function ord_inventory_page() {
   
   //this allows us to sort by these fields
@@ -120,7 +62,6 @@ function ord_inventory_page() {
   $query = db_select('ord_inventory_items', 'd')->extend('PagerDefault')->extend('TableSort');
   $query->fields('d', array('id', 'description', 'rental_price'));
 
-  // Change the number of rows with the limit() call.
   $result = $query
     ->limit(10) //change this number to make it page more...
     ->orderByHeader($header)
@@ -134,8 +75,6 @@ function ord_inventory_page() {
     $rows[] = array('data' => (array) $row);
   }
 
-  // Create a render array ($build) which will be themed as a table with a
-  // pager.
   $build['ord_inventory_table'] = array(
     '#theme' => 'table',
     '#header' => $header,
@@ -148,6 +87,3 @@ function ord_inventory_page() {
 
   return $build;
 }
-/**
- * @} End of "defgroup pager_example".
- */
