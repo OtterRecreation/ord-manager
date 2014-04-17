@@ -1,0 +1,208 @@
+<?php
+
+function ord_inventory_install() {
+    install_taxonomy_vocabularies();
+}
+
+function install_taxonomy_vocabularies() {
+
+  $vocab = get_taxonomy_vocabularies();
+  //must be an object (casting it to an object)
+  foreach($vocab as $v) {
+    taxonomy_vocabulary_save((object) $v);
+  }
+}
+
+function ord_inventory_uninstall() {
+  $vocab = get_taxonomy_vocabularies();
+
+  foreach($vocab as $key => $v) {
+      $v = taxonomy_vocabulary_machine_name_load($key);
+      taxonomy_vocabulary_delete($v->vid);
+  }
+}
+
+function get_taxonomy_vocabularies() {
+  // Create the vocabularies programatically.
+  $vocab['brand'] = array(
+    'name' => 'Brand',
+    'machine_name' => 'brand',
+    'description' => t('The brand that the item is associated with'),
+    'module' => 'ord_inventory',
+  );
+
+  $vocab['model'] = array(
+    'name' => 'Model',
+    'machine_name' => 'model',
+    'description' => t('The model that the item is associated with. (Really falls under the brand)'),
+    'module' => 'ord_inventory',
+  );
+
+  $vocab['catalogue'] = array(
+    'name' => 'Catalogue',
+    'machine_name' => 'catalogue',
+    'description' => t('The catalogue the item is associated with'),
+    'module' => 'ord_inventory',
+  );
+
+  $vocab['status'] = array(
+    'name' => 'Status',
+    'machine_name' => 'status',
+    'description' => t('The status the item is associated with'),
+    'module' => 'ord_inventory',
+  );
+
+  $vocab['condition'] = array(
+    'name' => 'Condition',
+    'machine_name' => 'condition',
+    'description' => t('The condition the item is associated with'),
+    'module' => 'ord_inventory',
+  );
+
+  return $vocab;
+}
+
+function ord_inventory_schema() {
+  $schema['ord_inventory_asset_class'] = ord_inventory_asset_class_table();
+  $schema['ord_inventory_asset'] = ord_inventory_asset_table();
+
+  return $schema;
+}
+
+function ord_inventory_asset_class_table() {
+  return array(
+    'description' => 'This table is used to keep track of a class of items in Ord Manager tables',
+      'fields' => array(
+          'id' => array(
+              'description' => 'The primary identifier for the table.',
+              'type' => 'serial',
+              'unsigned' => TRUE,
+              'not null' => TRUE,
+          ),
+          'name' => array(
+              'description' => 'The name of the item',
+              'type' => 'varchar',
+              'length' => 250,
+              'not null' => TRUE,
+              'default' => '',
+          ),
+          'description' => array(
+              'description' => 'A field for storing the description of the items',
+              'type' => 'varchar',
+              'length' => 250,
+              'not null' => TRUE,
+              'default' => '',
+          ),
+          'retail_price' => array(
+              'description' => 'A field for storing longer strings of text.',
+              'type' => 'float',
+              'not null' => FALSE,
+          ),
+          'created_at' => array(
+              'description' => 'Keeps track of the date / time of when the asset was created',
+              'mysql_type' => 'DATETIME',
+              'type' => 'datetime',
+              'not null' => TRUE,
+          )
+      ),
+      'indexes' => array(
+        'ord_inventory_items_id' => array('id'),
+      ),
+      'primary key' => array('id'),
+  );
+}
+
+function ord_inventory_asset_table() {
+  return array(
+    'description' => 'This table is used to keep track of any physical items of the Ord Manager system',
+      'fields' => array(
+          'inventory_number' => array(
+              'description' => '',
+              'type' => 'varchar',
+              'length' => '255',
+              'not null' => TRUE,
+              'default' => '',
+          ),
+          'id' => array(
+              'description' => 'The primary identifier for the table.',
+              'type' => 'serial',
+              'unsigned' => TRUE,
+              'not null' => TRUE,
+          ),
+          'ac_id' => array(
+              'description' => 'Asset class the item is associated with',
+              'type' => 'int',
+              'not null' => TRUE,
+              'default' => 0,
+          ),
+          'brand_id' => array(
+              'description' => 'Brand the item is a part of',
+              'type' => 'int',
+              'not null' => TRUE,
+              'default' => 0,
+          ),
+          'model_id' => array(
+              'description' => 'Model the item is a part of',
+              'type' => 'int',
+              'not null' => TRUE,
+              'default' => 0,
+          ),
+          'catalogue_id' => array(
+              'description' => 'The specific catalogue number of the item',
+              'type' => 'int',
+              'not null' => TRUE,
+              'default' => 0,
+          ),
+          'catalogue_number' => array(
+              'description' => 'The catalogue number the item is associated with',
+              'type' => 'int',
+              'not null' => TRUE,
+              'default' => 0,
+          ),
+          'status_id' => array(
+              'description' => 'Status of the asset',
+              'type' => 'int',
+              'not null' => TRUE,
+              'default' => 0,
+          ),
+          'condition_id' => array(
+              'description' => 'The condition of the asset',
+              'type' => 'int',
+              'not null' => TRUE,
+              'default' => 0,
+          ),
+          'location_id' => array(
+              'description' => 'Location of the asset',
+              'type' => 'int',
+              'not null' => TRUE,
+              'default' => 0,
+          ),
+          'wholesale_cost' => array(
+              'description' => 'The cost of the asset based on wholesale',
+              'type' => 'float',
+              'null' => TRUE,
+          ),
+          'purchase_cost' => array(
+              'description' => 'The cost of the asset if it were sold to the customer',
+              'type' => 'float',
+              'null' => TRUE,
+          ),
+          'created_at' => array(
+              'description' => 'Keeps track of the date / time of when the asset was created',
+              'mysql_type' => 'DATETIME',
+              'type' => 'datetime',
+              'not null' => TRUE,
+          ),
+          'created_by' => array(
+              'description' => 'Keeps track of the user that made this entry',
+              'type' => 'int',
+              'not null' => TRUE,
+              'default' => 0,
+          )
+      ),
+      'indexes' => array(
+        'ord_inventory_items_id' => array('id'),
+      ),
+      'primary key' => array('id'),
+  );
+}

@@ -1,0 +1,204 @@
+<?php
+
+function ord_inventory_help($path, $args) {
+	switch ($path) {
+		case 'admin/help#ord_inventory':
+			return '<p>' . t('temporary help text for now') . '</p>';
+		break;
+	}
+}
+
+function ord_inventory_node_info() {
+  return array(
+    'ord_inventory_item' => array(
+      'name' => t('Ord Inventory Item'),
+      'base' => 'ord_inventory',
+      'description' => t('Used to create new items'),
+      'title_label' => t('Ord Inventory Item'),
+      'locked' => TRUE, // machine name will be unchangable
+    ),
+  );
+}
+
+function ord_inventory_node_type_insert($content_type) {
+  if ($content_type->type == 'ord_inventory_item') {
+    $body_instance = node_add_body_field($content_type, t('Where does this go'));
+
+    $body_instance['display']['ord_inventory_list'] = array(
+      'label' => 'hidden',
+      'type' => 'text_summary_or_trimmed',
+    );
+
+    // Save our changes to the body field instance.
+    field_update_instance($body_instance);
+
+    // Create all the fields we are adding to our content type.
+    foreach (_ord_inventory_installed_fields() as $field) {
+      field_create_field($field);
+    }
+
+    // Create all the instances for our fields.
+    foreach (_ord_inventory_installed_instances() as $instance) {
+      $instance['entity_type'] = 'node';
+      $instance['bundle'] = 'ord_inventory';
+      field_create_instance($instance);
+    }
+  }
+}
+
+function _ord_inventory_installed_fields() {
+  return array(
+    'ord_inventory_color' => array(
+      'field_name' => 'ord_inventory_color',
+      'cardinality' => 3,
+      'type'        => 'text',
+      'settings'    => array(
+        'max_length' => 60,
+      ),
+    ),
+    'ord_inventory_quantity' => array(
+      'field_name'  => 'ord_inventory_quantity',
+      'cardinality' => 1,
+      'type'        => 'text',
+    ),
+    'ord_inventory_image' => array(
+      'field_name' => 'ord_inventory_image',
+      'type'       => 'image',
+      'cardinality' => 1,
+    ),
+  );
+}
+
+function _ord_inventory_installed_instances() {
+  return array(
+    'ord_inventory_color' => array(
+      'field_name' => 'ord_inventory_color',
+      'label'       => t('The colors available for this object.'),
+      'widget'      => array(
+        'type'    => 'text_textfield',
+      ),
+      'display' => array(
+        'ord_inventory_list' => array(
+          'label' => 'hidden',
+          'type' => 'ord_inventory_colors',
+        ),
+      ),
+    ),
+    'ord_inventory_quantity' => array(
+      'field_name'  => 'ord_inventory_quantity',
+      'label' => t('Quantity required'),
+      'type'        => 'text',
+      'widget'      => array(
+        'type'    => 'text_textfield',
+      ),
+      'display' => array(
+        'ord_inventory_list' => array(
+          'label' => 'hidden',
+          'type' => 'hidden',
+        ),
+      ),
+    ),
+    'ord_inventory_image' => array(
+      'field_name'  => 'ord_inventory_image',
+      'label'       => t('Upload an image:'),
+      'required'    => FALSE,
+      'widget' => array(
+        'type'    => 'image_image',
+        'weight'  => 2.10,
+      ),
+      'display' => array(
+        'ord_inventory_list' => array(
+          'label' => 'hidden',
+          'type' => 'image_link_content__thumbnail',
+        ),
+      ),
+    ),
+  );
+}
+
+function ord_inventory_entity_info_alter(&$entity_info) {
+  // Add our new view mode to the list of view modes...
+  $entity_info['node']['view modes']['ord_inventory_list'] = array(
+    'label' => t('Ord Inventory Node List'),
+    'custom settings' => TRUE,
+  );
+}
+
+function ord_inventory_form($node, $form_state) {
+  return node_content_form($node, $form_state);
+}
+
+function ord_inventory_page() {
+  // We'll start building a renderable array that will be our page.
+  // For now we just declare the array.
+  $renderable_array = array();
+  // We query the database and find all of the nodes for the type we defined.
+  $sql = 'SELECT nid FROM {node} n WHERE n.type = :type AND n.status = :status';
+  $result = db_query($sql,
+    array(
+      ':type' => 'ord_inventory_item',
+      ':status' => 1,
+    )
+  );
+  $renderable_array['explanation'] = array(
+    //'#markup' => t("All the items created!"),
+  );
+  // Loop through each of our node_example nodes and instruct node_view
+  // to use our "example_node_list" view.
+  // http://api.drupal.org/api/function/node_load/7
+  // http://api.drupal.org/api/function/node_view/7
+  foreach ($result as $row) {
+    $node = node_load($row->nid);
+    $renderable_array['node_list'][] = node_view($node, 'ord_inventory_list');
+  }
+  return $renderable_array;
+}
+
+function ord_inventory_menu() {
+  $items['ord_inventory/items'] = array(
+    'title' => 'Rentals',
+    'description' => 'Show a page with a long list across multiple pages',
+    'page callback' => 'ord_inventory_page',
+    'access callback' => TRUE,
+  );
+  return $items;
+}
+
+// function ord_inventory_page() {
+  
+//   //this allows us to sort by these fields
+//   $header = array(
+//     array('data' => t('Name'), 'field' => 'd.name'),
+//     array('data' => t('Description') , 'field' => 'd.description'),
+//     array('data' => t('Price'), 'field' => 'd.rental_price'),
+//   );
+
+//   // We are extending the PagerDefault class here as well as the TableSort class
+//   $query = db_select('ord_inventory_items', 'd')->extend('PagerDefault')->extend('TableSort');
+//   $query->fields('d', array('id', 'description', 'rental_price'));
+
+//   $result = $query
+//     ->limit(10) //change this number to make it page more...
+//     ->orderByHeader($header)
+//     ->execute();
+
+//   $rows = array();
+//   foreach ($result as $row) {
+//     // Normally we would add some nice formatting to our rows
+//     // but for our purpose we are simply going to add our row
+//     // to the array.
+//     $rows[] = array('data' => (array) $row);
+//   }
+
+//   $build['ord_inventory_table'] = array(
+//     '#theme' => 'table',
+//     '#header' => $header,
+//     '#rows' => $rows,
+//     '#empty' => t('No items yet'),
+//   );
+
+//   // Attach the pager theme.
+//   $build['pager_pager'] = array('#theme' => 'pager');
+
+//   return $build;
+// }
