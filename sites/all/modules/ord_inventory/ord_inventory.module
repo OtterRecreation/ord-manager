@@ -128,6 +128,32 @@ function ord_inventory_form($node, $form_state) {
   return node_content_form($node, $form_state);
 }
 
+function ord_inventory_page() {
+  // We'll start building a renderable array that will be our page.
+  // For now we just declare the array.
+  $renderable_array = array();
+  // We query the database and find all of the nodes for the type we defined.
+  $sql = 'SELECT nid FROM {node} n WHERE n.type = :type AND n.status = :status';
+  $result = db_query($sql,
+    array(
+      ':type' => 'ord_inventory_item',
+      ':status' => 1,
+    )
+  );
+  $renderable_array['explanation'] = array(
+    //'#markup' => t("All the items created!"),
+  );
+  // Loop through each of our node_example nodes and instruct node_view
+  // to use our "example_node_list" view.
+  // http://api.drupal.org/api/function/node_load/7
+  // http://api.drupal.org/api/function/node_view/7
+  foreach ($result as $row) {
+    $node = node_load($row->nid);
+    $renderable_array['node_list'][] = node_view($node, 'ord_inventory_list');
+  }
+  return $renderable_array;
+}
+
 function ord_inventory_menu() {
   $items['ord_inventory/items'] = array(
     'title' => 'Rentals',
@@ -138,41 +164,41 @@ function ord_inventory_menu() {
   return $items;
 }
 
-function ord_inventory_page() {
+// function ord_inventory_page() {
   
-  //this allows us to sort by these fields
-  $header = array(
-    array('data' => t('Name'), 'field' => 'd.name'),
-    array('data' => t('Description') , 'field' => 'd.description'),
-    array('data' => t('Price'), 'field' => 'd.rental_price'),
-  );
+//   //this allows us to sort by these fields
+//   $header = array(
+//     array('data' => t('Name'), 'field' => 'd.name'),
+//     array('data' => t('Description') , 'field' => 'd.description'),
+//     array('data' => t('Price'), 'field' => 'd.rental_price'),
+//   );
 
-  // We are extending the PagerDefault class here as well as the TableSort class
-  $query = db_select('ord_inventory_items', 'd')->extend('PagerDefault')->extend('TableSort');
-  $query->fields('d', array('id', 'description', 'rental_price'));
+//   // We are extending the PagerDefault class here as well as the TableSort class
+//   $query = db_select('ord_inventory_items', 'd')->extend('PagerDefault')->extend('TableSort');
+//   $query->fields('d', array('id', 'description', 'rental_price'));
 
-  $result = $query
-    ->limit(10) //change this number to make it page more...
-    ->orderByHeader($header)
-    ->execute();
+//   $result = $query
+//     ->limit(10) //change this number to make it page more...
+//     ->orderByHeader($header)
+//     ->execute();
 
-  $rows = array();
-  foreach ($result as $row) {
-    // Normally we would add some nice formatting to our rows
-    // but for our purpose we are simply going to add our row
-    // to the array.
-    $rows[] = array('data' => (array) $row);
-  }
+//   $rows = array();
+//   foreach ($result as $row) {
+//     // Normally we would add some nice formatting to our rows
+//     // but for our purpose we are simply going to add our row
+//     // to the array.
+//     $rows[] = array('data' => (array) $row);
+//   }
 
-  $build['ord_inventory_table'] = array(
-    '#theme' => 'table',
-    '#header' => $header,
-    '#rows' => $rows,
-    '#empty' => t('No items yet'),
-  );
+//   $build['ord_inventory_table'] = array(
+//     '#theme' => 'table',
+//     '#header' => $header,
+//     '#rows' => $rows,
+//     '#empty' => t('No items yet'),
+//   );
 
-  // Attach the pager theme.
-  $build['pager_pager'] = array('#theme' => 'pager');
+//   // Attach the pager theme.
+//   $build['pager_pager'] = array('#theme' => 'pager');
 
-  return $build;
-}
+//   return $build;
+// }
