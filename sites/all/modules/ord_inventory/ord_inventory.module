@@ -1,13 +1,11 @@
 <?php
 
 function ord_inventory_help($path, $args) {
-
 	switch ($path) {
 		case 'admin/help#ord_inventory':
 			return '<p>' . t('temporary help text for now') . '</p>';
 		break;
 	}
-
 }
 
 function ord_inventory_node_info() {
@@ -24,14 +22,8 @@ function ord_inventory_node_info() {
 
 function ord_inventory_node_type_insert($content_type) {
   if ($content_type->type == 'ord_inventory_item') {
-    // First we add the body field. Node API helpfully gives us
-    // node_add_body_field().
-    // We'll set the body label now, although we could also set
-    // it along with our other instance properties later.
     $body_instance = node_add_body_field($content_type, t('Where does this go'));
 
-    // Add our ord_inventory_list view mode to the body instance
-    // display by instructing the body to display as a summary.
     $body_instance['display']['ord_inventory_list'] = array(
       'label' => 'hidden',
       'type' => 'text_summary_or_trimmed',

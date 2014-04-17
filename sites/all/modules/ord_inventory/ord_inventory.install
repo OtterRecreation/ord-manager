@@ -98,11 +98,6 @@ function ord_inventory_asset_class_table() {
               'type' => 'float',
               'not null' => FALSE,
           ),
-          'extra' => array(
-              'description' => 'Holds JSON data ',
-              'type' => 'text',
-              'not null' => TRUE,
-          ),
           'created_at' => array(
               'description' => 'Keeps track of the date / time of when the asset was created',
               'mysql_type' => 'DATETIME',
