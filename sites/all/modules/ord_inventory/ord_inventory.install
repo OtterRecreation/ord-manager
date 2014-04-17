@@ -124,6 +124,7 @@ function ord_inventory_asset_table() {
           'inventory_number' => array(
               'description' => '',
               'type' => 'varchar',
+              'length' => '255',
               'not null' => TRUE,
               'default' => '',
           ),

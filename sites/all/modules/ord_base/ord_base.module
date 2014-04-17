@@ -1,9 +1,0 @@
-<?php
-
-function ord_base_help($path, $args) {
-	switch ($path) {
-		case 'admin/help#ord_base':
-			return t('help text for the Ord Base module');
-		break;
-	}
-}

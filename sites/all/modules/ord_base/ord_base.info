@@ -1,4 +1,0 @@
-name = Ord Manager Base
-description = This module acts as the "interface" for all other Ord Manager modules.
-core = 7.x
-package = Ord Manager

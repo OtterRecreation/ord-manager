@@ -1,8 +1,5 @@
 <?php
 
-/*
-Should put some doxygen stuff in here
-*/
 function ord_inventory_help($path, $args) {
 
 	switch ($path) {
@@ -13,7 +10,6 @@ function ord_inventory_help($path, $args) {
 
 }
 
-//BEGIN THE NODE_MODULE PORTION
 function ord_inventory_node_info() {
   return array(
     'ord_inventory_item' => array(
@@ -26,19 +22,120 @@ function ord_inventory_node_info() {
   );
 }
 
-function ord_inventory_node_view($node, $view_mode, $langcode) {
+function ord_inventory_node_type_insert($content_type) {
+  if ($content_type->type == 'ord_inventory_item') {
+    // First we add the body field. Node API helpfully gives us
+    // node_add_body_field().
+    // We'll set the body label now, although we could also set
+    // it along with our other instance properties later.
+    $body_instance = node_add_body_field($content_type, t('Where does this go'));
 
-  $node->content['my_additional_field'] = array(
-    '#markup' => 'what goes here',
-    '#weight' => 10,
-    '#theme' => 'ord_inventory_my_additional_field',
-  );
+    // Add our ord_inventory_list view mode to the body instance
+    // display by instructing the body to display as a summary.
+    $body_instance['display']['ord_inventory_list'] = array(
+      'label' => 'hidden',
+      'type' => 'text_summary_or_trimmed',
+    );
 
+    // Save our changes to the body field instance.
+    field_update_instance($body_instance);
+
+    // Create all the fields we are adding to our content type.
+    foreach (_ord_inventory_installed_fields() as $field) {
+      field_create_field($field);
+    }
+
+    // Create all the instances for our fields.
+    foreach (_ord_inventory_installed_instances() as $instance) {
+      $instance['entity_type'] = 'node';
+      $instance['bundle'] = 'ord_inventory';
+      field_create_instance($instance);
+    }
+  }
 }
 
-/**
- * Implements hook_menu().
- */
+function _ord_inventory_installed_fields() {
+  return array(
+    'ord_inventory_color' => array(
+      'field_name' => 'ord_inventory_color',
+      'cardinality' => 3,
+      'type'        => 'text',
+      'settings'    => array(
+        'max_length' => 60,
+      ),
+    ),
+    'ord_inventory_quantity' => array(
+      'field_name'  => 'ord_inventory_quantity',
+      'cardinality' => 1,
+      'type'        => 'text',
+    ),
+    'ord_inventory_image' => array(
+      'field_name' => 'ord_inventory_image',
+      'type'       => 'image',
+      'cardinality' => 1,
+    ),
+  );
+}
+
+function _ord_inventory_installed_instances() {
+  return array(
+    'ord_inventory_color' => array(
+      'field_name' => 'ord_inventory_color',
+      'label'       => t('The colors available for this object.'),
+      'widget'      => array(
+        'type'    => 'text_textfield',
+      ),
+      'display' => array(
+        'ord_inventory_list' => array(
+          'label' => 'hidden',
+          'type' => 'ord_inventory_colors',
+        ),
+      ),
+    ),
+    'ord_inventory_quantity' => array(
+      'field_name'  => 'ord_inventory_quantity',
+      'label' => t('Quantity required'),
+      'type'        => 'text',
+      'widget'      => array(
+        'type'    => 'text_textfield',
+      ),
+      'display' => array(
+        'ord_inventory_list' => array(
+          'label' => 'hidden',
+          'type' => 'hidden',
+        ),
+      ),
+    ),
+    'ord_inventory_image' => array(
+      'field_name'  => 'ord_inventory_image',
+      'label'       => t('Upload an image:'),
+      'required'    => FALSE,
+      'widget' => array(
+        'type'    => 'image_image',
+        'weight'  => 2.10,
+      ),
+      'display' => array(
+        'ord_inventory_list' => array(
+          'label' => 'hidden',
+          'type' => 'image_link_content__thumbnail',
+        ),
+      ),
+    ),
+  );
+}
+
+function ord_inventory_entity_info_alter(&$entity_info) {
+  // Add our new view mode to the list of view modes...
+  $entity_info['node']['view modes']['ord_inventory_list'] = array(
+    'label' => t('Ord Inventory Node List'),
+    'custom settings' => TRUE,
+  );
+}
+
+function ord_inventory_form($node, $form_state) {
+  return node_content_form($node, $form_state);
+}
+
 function ord_inventory_menu() {
   $items['ord_inventory/items'] = array(
     'title' => 'Rentals',
