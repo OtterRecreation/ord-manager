@@ -14,6 +14,6 @@
 
     <target name="lint"
             description="Basic php syntax error checking">
-    	<echo>Let's try to publish this guy to the release server</echo>
+    	<echo>Try it again</echo>
     </target>
 </project>
