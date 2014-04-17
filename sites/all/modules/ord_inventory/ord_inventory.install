@@ -121,6 +121,12 @@ function ord_inventory_asset_table() {
   return array(
     'description' => 'This table is used to keep track of any physical items of the Ord Manager system',
       'fields' => array(
+          'inventory_number' => array(
+              'description' => '',
+              'type' => 'varchar',
+              'not null' => TRUE,
+              'default' => '',
+          ),
           'id' => array(
               'description' => 'The primary identifier for the table.',
               'type' => 'serial',
