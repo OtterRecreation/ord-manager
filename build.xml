@@ -14,6 +14,6 @@
 
     <target name="lint"
             description="Basic php syntax error checking">
-    	<echo>Lint executed. let's see</echo>
+    	<echo>Lint executed. Made a change to develop branch</echo>
     </target>
 </project>
