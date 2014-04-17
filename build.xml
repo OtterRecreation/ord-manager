@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <project name="Build test" default="initialize">
  	<target name="initialize">
-    	<echo>Successfully integrated with github</echo>
+    	<echo>So far it doesn't work</echo>
 	</target>
 </project>
