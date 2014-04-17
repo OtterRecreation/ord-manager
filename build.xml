@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <project name="Build test" default="initialize">
  	<target name="initialize">
-    	<echo>Oauth verified</echo>
+    	<echo>Oauth. please work!</echo>
 	</target>
 </project>
