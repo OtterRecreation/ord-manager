@@ -1,0 +1,54 @@
+<?php
+
+function order_form_schema() {
+
+  //hopefully this is right
+  $schema['order_form_items'] = array(
+    'description' => 'An example table, test CE',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for the table.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'catalog_number' => array(
+        'description' => 'Part number in catalog',
+        'type' => 'varchar',
+        'length' => 15,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'quantity' => array(
+        'description' => 'Requested quantity to order.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'description' => array(
+        'description' => 'Part description. Brand, size, model, color, etc.(SRAM chain 10spd 1051)',
+        'type' => 'varchar',
+        'length' => 250,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'cost_wholesale' => array(
+        'description' => 'Estemated catalog cost, wholesale price.',
+        'type' => 'float',
+        'not null' => TRUE,
+      ),
+      'sale_price' => array(
+        'description' => 'Price quoted to customer.',
+        'type' => 'float',
+        'not null' => TRUE,
+      ),
+    ),
+    'indexes' => array(
+      'order_form_items' => array('id'),
+    ),
+    'primary key' => array('id'),
+  );
+
+  return $schema;
+}

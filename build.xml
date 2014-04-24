@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<project name="Build test" default="build">
+ 	<target name="build"
+            description="The task that kicks off the rest (they will be executed in order)"
+            depends="prepare,lint" />
+
+	<target name="clean">
+		<echo>Clean executed</echo>
+	</target>
+
+	<target name="prepare" depends="clean">
+		<echo>Prepare executed</echo>
+	</target>
+
+    <target name="lint"
+            description="Basic php syntax error checking">
+    	<echo>Try it again</echo>
+    </target>
+</project>
