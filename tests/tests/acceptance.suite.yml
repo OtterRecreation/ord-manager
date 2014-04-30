@@ -8,6 +8,9 @@
 
 # RUN `build` COMMAND AFTER ADDING/REMOVING MODULES.
 
+#for CI server url use https://csumb.ci.cloudbees.com/job/Otter%20Recreation/ws/
+#for localhost url use http://localhost/ord-manager
+
 class_name: WebGuy
 modules:
     enabled:
@@ -15,4 +18,4 @@ modules:
          - WebHelper
     config:
         PhpBrowser:
-             url: 'http://localhost/ord-manager/'
+             url: 'http://localhost/ord-manager'

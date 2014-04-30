@@ -2,18 +2,21 @@
 <project name="Build test" default="build">
  	<target name="build"
             description="The task that kicks off the rest (they will be executed in order)"
-            depends="prepare,lint" />
+            depends="lint,acceptance-test" />
 
-	<target name="clean">
-		<echo>Clean executed</echo>
+    <target name="lint" description="Perform syntax check of sourcecode files">
+		<apply executable="php" failonerror="true">
+			<arg value="-l" />
+			<fileset dir="${basedir}">
+				<include name="**/*.php" />
+				<modified />
+			</fileset>
+		</apply>
 	</target>
 
-	<target name="prepare" depends="clean">
-		<echo>Prepare executed</echo>
-	</target>
-
-    <target name="lint"
-            description="Basic php syntax error checking">
-    	<echo>Try it again</echo>
+    <target name="acceptance-test" description="Run acceptance tests">
+    	<exec dir="${basedir}/tests" executable="php" failonerror="true">
+		    <arg line="codecept.phar --xml run acceptance" />
+		</exec>
     </target>
 </project>
