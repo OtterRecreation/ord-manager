@@ -1,0 +1,4 @@
+name = ORD swipe
+description = alpha cardswipe data collection for events.
+core = 7.x
+package = Ord Manager

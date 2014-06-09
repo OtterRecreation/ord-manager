@@ -1,0 +1,53 @@
+<?php
+
+// install file for creating a DB specific to a module
+// this install will have id serial indexing for 
+
+
+function swipe_schema() {
+
+  
+  $schema['swipe_items'] = array(
+    'description' => t('swipe table for ORD manager'),
+    'fields' => array(  // insert data points for table. int varchar, 
+      'key_id' => array(
+                        'description' => t('index'),
+                        'type'        => 'serial', // self counting
+                        'unsigned'    => TRUE,
+                        'not null'    => TRUE
+      ),
+      // primary id
+      'id_number' => array(
+                          'description' => t('School ID Number. 9 digits.'),
+                          'type'        => 'int',
+                          'length'      => 9, //school id have 9 digits
+                          'unsigned'    => TRUE,
+                          'not null'    => TRUE,
+                          'default'     => 0
+      ),
+      'timestamp_swipe' => array(
+                                'description' => t('Timestamp of swipe'),
+                                'type'        => 'int',   // try unix timestamp, 10 digits.
+                                'length'      => 10,
+                                //'mysql_type'  => 'DATETIME', <-- NO WORKIE
+                                'not null'    => TRUE,
+                                'default'     => 0
+      ),
+      // event identifier.
+      'event_id' => array(
+                          'description' => t('Event ID'),
+                          'type'        => 'int',
+                          'length'      => 9,
+                          'unsigned'    => TRUE,
+                          'not null'    => TRUE,
+                          'default'     => 0
+      ),
+    ),  // end 'fields' array
+
+    'indexes' => array('swipe_items' => array('key_id'),),
+    'primary key' => array('key_id'), // define primary key
+
+  );  // end 'schema' array
+
+  return $schema;
+}

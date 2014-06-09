@@ -1,0 +1,86 @@
+<?php
+/*=====================================
+swipe will take in card swipe data from card swipes
+time stamp them, along with id number.
+=======================================*/
+
+
+// this will be the help menu for admins if they need it.
+function swipe_help($path, $args){
+
+	switch($path){
+		case 'admin/help#ord_swipe':
+			return '<p>' . t('temp help for order form') . '</p>';
+		break;
+	}
+} // end help
+
+function swipe_block_info(){
+
+	$block['swipe_graph'] = array(
+		'info' => 'swipe thingamajig'
+		);
+	return $block;
+} // end block_info
+
+function swipe_block_view($delta = ''){
+
+	$block = array();
+
+	switch ($delta){
+		case 'swipe_graph': // not sure if graph is the right syntax.
+			$block['subject'] = null;
+			$block['content'] = drupal_get_form('swipe_add_form');
+		break; 
+	}
+	return $block;
+}// end block_view
+
+
+/*=====================================
+form is where you create a form for input.
+=======================================*/
+function swipe_add_form($form, &$form_state){
+
+	$form['id_swipe'] = array(
+		'#type' 	 => 'textfield',
+		'#required'  => TRUE,
+		'#title' 	 => t('Swipe: Otter ID card'),
+	);	
+
+	$form['event'] = array(
+		'#type' 	 => 'textfield',
+		'#required'  => TRUE,
+		'#title' 	 => t('Enter Event ID here:'),
+	);
+
+	// submit form when ready to insert into DB.
+	$form['submit'] = array(
+		'#type'  => 'submit',
+		'#value' => 'submit',
+		// call function to add to DB
+		'#submit'=> array('swipe_insert'),
+	);
+	return $form;
+}
+
+
+
+// this is called from #submit above, sends form data into DB
+//
+function swipe_insert($form, &$form_state){
+
+	$timestamp_unix = mktime();
+  // Grab the info from $node and insert into your tables here...
+
+  db_insert('swipe_items')->fields(array(
+
+// 'name in DB'    		=> $form_state['values']['name in form']
+    'id_number'			=> $form_state['values']['id_swipe'],
+	'timestamp_swipe'	=> $timestamp_unix,
+    'event_id'			=> $form_state['values']['event'],
+  ))->execute();
+}
+
+
+?>

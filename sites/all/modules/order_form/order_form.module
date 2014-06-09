@@ -69,7 +69,8 @@ function order_form_add_form($form, &$form_state){
 	$form['submit'] = array(
 		'#type'  => 'submit',
 		'#value' => 'submit',
-		'#submit'=> array('order_form_insert'),// call function to add to DB
+		// call function to add to DB
+		'#submit'=> array('order_form_insert'),
 	);
 
 	return $form;
